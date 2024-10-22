@@ -35,24 +35,7 @@ RUN cd /tmp \
 # Configure gclient with custom settings to skip tests
 RUN cd /tmp/v8 \
     && export PATH="/tmp/depot_tools:$PATH" \
-    && gclient config --spec 'solutions = [
-    {
-        "name": ".",
-        "url": "https://chromium.googlesource.com/v8/v8.git",
-        "deps_file": "DEPS",
-        "managed": False,
-        "custom_deps": {
-            "test/wasm-spec-tests": None,
-            "test/mozilla/data": None,
-            "test/test262/data": None,
-            "test/test262/harness": None,
-            "third_party/android_tools": None,
-            "third_party/catapult": None,
-            "third_party/colorama/src": None,
-            "tools/gyp": None,
-            "tools/luci-go": None
-        }
-    }]' \
+    && gclient config --spec 'solutions = [{"name": ".","url": "https://chromium.googlesource.com/v8/v8.git","deps_file": "DEPS","managed": False,"custom_deps": {"test/wasm-spec-tests": None,"test/mozilla/data": None,"test/test262/data": None,"test/test262/harness": None,"third_party/android_tools": None,"third_party/catapult": None,"third_party/colorama/src": None,"tools/gyp": None,"tools/luci-go": None}}]' \
     && export GCLIENT_SUPPRESS_GIT_VERSION_WARNING=1 \
     && gclient sync -D --force --reset \
     && tools/dev/v8gen.py -vv x64.release -- \
