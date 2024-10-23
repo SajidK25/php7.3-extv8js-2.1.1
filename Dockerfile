@@ -13,6 +13,7 @@ RUN apt-get update -y --fix-missing \
     libglib2.0-dev \
     libxml2 \
     python \
+    python-pip \
     patchelf \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -35,10 +36,15 @@ RUN cd /tmp \
 # Configure gclient and build v8 with minimal dependencies
 RUN cd /tmp/v8 \
     && export PATH="/tmp/depot_tools:$PATH" \
+    && export PYTHONPATH="/tmp/v8/tools/mb:/tmp/v8/third_party/pymock:/tmp/v8/testing/scripts:${PYTHONPATH}" \
     && echo 'solutions = [{"name": ".","url": "https://chromium.googlesource.com/v8/v8.git","deps_file": "DEPS","managed": False,"custom_deps": {"v8/test/*": None,"v8/testing/*": None,"v8/third_party/android_tools": None,"v8/third_party/catapult": None,"v8/third_party/colorama/src": None,"v8/tools/gyp": None,"v8/tools/luci-go": None,"v8/test/wasm-js": None}}]' > /tmp/v8/.gclient \
     && export DEPOT_TOOLS_UPDATE=0 \
     && export GCLIENT_SUPPRESS_GIT_VERSION_WARNING=1 \
     && yes | gclient sync --no-history --reset --nohooks \
+    && mkdir -p third_party/python_libs \
+    && git clone https://chromium.googlesource.com/chromium/src/tools/gn /tmp/gn \
+    && cp /tmp/gn/tools/gn_helpers.py third_party/python_libs/ \
+    && ln -s /tmp/v8/third_party/python_libs/gn_helpers.py /tmp/v8/tools/mb/gn_helpers.py \
     && tools/dev/v8gen.py -vv x64.release -- \
        is_component_build=true \
        use_custom_libcxx=false \
@@ -76,4 +82,4 @@ RUN cd /tmp \
     && docker-php-ext-enable v8js
 
 # Cleanup
-RUN rm -rf /tmp/depot_tools /tmp/v8 /tmp/v8js
+RUN rm -rf /tmp/depot_tools /tmp/v8 /tmp/v8js /tmp/gn
